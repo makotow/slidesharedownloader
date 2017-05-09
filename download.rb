@@ -15,11 +15,11 @@ require 'uri'
 ## https://github.com/rest-client/rest-client
 
 class DownloadItem
-  attr_accessor :filename, :downloadurl
+  attr_accessor :filename, :downloadurl, :download
 end
 
 class Downloader
-
+  # Slideshare API document, https://www.slideshare.net/developers/documentation#get_slideshow
   API_ENDPOINT_GET_BY_USER = 'https://www.slideshare.net/api/2/get_slideshows_by_user'
   attr_reader :successlogger, :stdout, :warnlogger
 
@@ -45,14 +45,15 @@ class Downloader
     items = []
     doc.elements.each('//Slideshow') do |e|
       i = DownloadItem.new
-      i.filename =  e.elements['Title'].text + "." + e.elements['Format'].text
+      i.filename    = e.elements['Title'].text + "." + e.elements['Format'].text
       i.downloadurl = e.elements['DownloadUrl'].text
+      i.download    = e.elements['Download'].text # 1 if available, else 0
       items << i
     end
 
-    size = items.size
+
     @progress = ProgressBar.create( :format         => "%a %E %b\u{15E7}%i %P%% %t %c/%C",
-                                    :total          => size,
+                                    :total          => items.size,
                                     :progress_mark  => ' ',
                                     :remainder_mark => "\u{FF65}",
                                   )
@@ -94,7 +95,7 @@ class Downloader
         download(item)
         sleep(@sleep)
       rescue => e
-        @warnlogger.warn "#{e.message}: Skip following slide. title: #{item.filename} url: #{item.downloadurl}"
+        @warnlogger.warn "#{e.message}: Skip following slide. Downloadable?: #{item.download}  title: #{item.filename} url: #{item.downloadurl}"
       end
       @progress.increment
     end
