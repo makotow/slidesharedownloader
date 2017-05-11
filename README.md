@@ -19,6 +19,13 @@ Slideshare API key and secret key can get following apply form.
 
 - [Apply API Key](https://www.slideshare.net/developers/applyforapi)
 
+Gem install
+
+run following commands.
+
+```
+$ gem install ruby-progressbar
+```
 
 ## How to use?
 
